@@ -10,7 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { useAuth, validateCredentials } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 // Login page with username and password fields
 const Login = () => {
