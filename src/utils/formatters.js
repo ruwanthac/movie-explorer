@@ -37,3 +37,8 @@ export const getTrailer = (videos = []) => {
 };
 
 export const getYouTubeUrl = (key) => `https://www.youtube.com/watch?v=${key}`;
+
+// Embed URL for playing a trailer inside the app. The privacy-enhanced
+// youtube-nocookie.com domain avoids tracking cookies until the video is played.
+export const getYouTubeEmbedUrl = (key) =>
+  `https://www.youtube-nocookie.com/embed/${key}?autoplay=1&rel=0&modestbranding=1`;
