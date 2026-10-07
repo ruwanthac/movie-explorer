@@ -1,16 +1,44 @@
 import axios from 'axios';
 import { TMDB_BASE_URL, TMDB_IMAGE_BASE_URL, POSTER_SIZE } from '../utils/constants';
+import { getErrorMessage } from './errors';
 
-// Shared axios instance for every TMDb request.
-// The API key is read from .env and attached to each request as a query param.
+export const MISSING_API_KEY_MESSAGE =
+  'The TMDb API key is missing. Add REACT_APP_TMDB_API_KEY to your .env file and restart the app.';
+
+// True when an API key has been provided in the environment
+export const isApiKeyConfigured = () => Boolean(process.env.REACT_APP_TMDB_API_KEY);
+
+// Shared axios instance for every TMDb request
 const tmdb = axios.create({
   baseURL: TMDB_BASE_URL,
   timeout: 10000,
-  params: {
-    api_key: process.env.REACT_APP_TMDB_API_KEY,
-    language: 'en-US',
-  },
+  params: { language: 'en-US' },
 });
+
+// Attach the API key to every request, or stop early if it is missing
+// so the user gets a clear message instead of a confusing 401
+tmdb.interceptors.request.use((config) => {
+  if (!isApiKeyConfigured()) {
+    const error = new Error(MISSING_API_KEY_MESSAGE);
+    error.userMessage = MISSING_API_KEY_MESSAGE;
+    return Promise.reject(error);
+  }
+  return {
+    ...config,
+    params: { ...config.params, api_key: process.env.REACT_APP_TMDB_API_KEY },
+  };
+});
+
+// Add a friendly explanation to every failed response
+tmdb.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!axios.isCancel(error)) {
+      error.userMessage = getErrorMessage(error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Trending movies for the week (paginated)
 export const getTrendingMovies = async (page = 1, signal) => {
