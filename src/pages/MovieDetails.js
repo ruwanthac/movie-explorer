@@ -114,7 +114,8 @@ const MovieDetails = () => {
       <Box
         sx={{
           position: 'relative',
-          borderRadius: 3,
+          // Edge to edge on phones, so no rounded corners there
+          borderRadius: { xs: 0, sm: 3 },
           overflow: 'hidden',
           mx: { xs: -2, sm: 0 },
           color: backdropUrl ? '#fff' : 'text.primary',
@@ -269,11 +270,7 @@ const MovieDetails = () => {
                   Watch trailer
                 </Button>
               )}
-              <FavoriteButton
-                movie={movie}
-                variant="button"
-                sx={backdropUrl ? { bgcolor: 'rgba(0, 0, 0, 0.4)' } : undefined}
-              />
+              <FavoriteButton movie={movie} variant="button" onDarkBackground={Boolean(backdropUrl)} />
             </Box>
           </Box>
         </Box>

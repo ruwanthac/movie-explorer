@@ -8,7 +8,8 @@ import { useNotification } from '../context/NotificationContext';
 
 // Heart button that adds or removes a movie from favorites.
 // variant="icon" is used on movie cards, variant="button" on the details page.
-const FavoriteButton = ({ movie, variant = 'icon', sx }) => {
+// `onDarkBackground` keeps the outlined button readable on top of an image.
+const FavoriteButton = ({ movie, variant = 'icon', onDarkBackground = false, sx }) => {
   const { isFavorite, addFavorite, removeFavorite } = useMovies();
   const { notify } = useNotification();
   const saved = isFavorite(movie.id);
@@ -39,7 +40,10 @@ const FavoriteButton = ({ movie, variant = 'icon', sx }) => {
         onClick={handleClick}
         aria-pressed={saved}
         aria-label={label}
-        sx={sx}
+        sx={{
+          ...(onDarkBackground && !saved && { bgcolor: 'rgba(0, 0, 0, 0.45)', color: '#ff8a80' }),
+          ...sx,
+        }}
       >
         {saved ? 'In favorites' : 'Add to favorites'}
       </Button>
