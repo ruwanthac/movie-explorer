@@ -28,9 +28,10 @@ export const searchMovies = async (query, page = 1, signal) => {
 };
 
 // Full movie details, including cast and videos in a single request
-export const getMovieDetails = async (movieId) => {
+export const getMovieDetails = async (movieId, signal) => {
   const { data } = await tmdb.get(`/movie/${movieId}`, {
     params: { append_to_response: 'credits,videos' },
+    signal,
   });
   return data;
 };

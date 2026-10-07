@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
 import axios from 'axios';
-import { getTrendingMovies, searchMovies as searchMoviesApi } from '../api/tmdb';
+import { getTrendingMovies, getMovieDetails, searchMovies as searchMoviesApi } from '../api/tmdb';
 import { getStoredItem, setStoredItem, removeStoredItem } from '../utils/storage';
 import { STORAGE_KEYS, TMDB_MAX_PAGES } from '../utils/constants';
 
@@ -20,6 +20,8 @@ const initialListState = {
 const createInitialState = () => ({
   trending: initialListState,
   search: { ...initialListState, query: getStoredItem(STORAGE_KEYS.LAST_SEARCH, '') },
+  // Movie details cached by id: { data, loading, error, notFound }
+  details: {},
 });
 
 export const ACTIONS = {
@@ -30,6 +32,9 @@ export const ACTIONS = {
   SEARCH_SUCCESS: 'SEARCH_SUCCESS',
   SEARCH_FAILURE: 'SEARCH_FAILURE',
   SEARCH_CLEAR: 'SEARCH_CLEAR',
+  DETAILS_REQUEST: 'DETAILS_REQUEST',
+  DETAILS_SUCCESS: 'DETAILS_SUCCESS',
+  DETAILS_FAILURE: 'DETAILS_FAILURE',
 };
 
 // Merges one page of TMDb results into a list.
@@ -79,6 +84,38 @@ export const movieReducer = (state, action) => {
     case ACTIONS.SEARCH_CLEAR:
       return { ...state, search: { ...initialListState, query: '' } };
 
+    case ACTIONS.DETAILS_REQUEST:
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          [action.payload.id]: { data: null, loading: true, error: null, notFound: false },
+        },
+      };
+
+    case ACTIONS.DETAILS_SUCCESS:
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          [action.payload.id]: { data: action.payload.data, loading: false, error: null, notFound: false },
+        },
+      };
+
+    case ACTIONS.DETAILS_FAILURE:
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          [action.payload.id]: {
+            data: null,
+            loading: false,
+            error: action.payload.message,
+            notFound: action.payload.notFound,
+          },
+        },
+      };
+
     default:
       return state;
   }
@@ -119,14 +156,34 @@ export const MovieProvider = ({ children }) => {
     }
   }, []);
 
+  // Loads full details (with cast and videos) for one movie
+  const fetchMovieDetails = useCallback(async (id, signal) => {
+    dispatch({ type: ACTIONS.DETAILS_REQUEST, payload: { id } });
+    try {
+      const data = await getMovieDetails(id, signal);
+      dispatch({ type: ACTIONS.DETAILS_SUCCESS, payload: { id, data } });
+    } catch (error) {
+      if (axios.isCancel(error)) return;
+      const notFound = error.response?.status === 404;
+      dispatch({
+        type: ACTIONS.DETAILS_FAILURE,
+        payload: {
+          id,
+          notFound,
+          message: notFound ? 'Movie not found.' : 'Could not load movie details. Please try again.',
+        },
+      });
+    }
+  }, []);
+
   const clearSearch = useCallback(() => {
     dispatch({ type: ACTIONS.SEARCH_CLEAR });
     removeStoredItem(STORAGE_KEYS.LAST_SEARCH);
   }, []);
 
   const value = useMemo(
-    () => ({ ...state, fetchTrending, searchMovies, clearSearch }),
-    [state, fetchTrending, searchMovies, clearSearch]
+    () => ({ ...state, fetchTrending, searchMovies, clearSearch, fetchMovieDetails }),
+    [state, fetchTrending, searchMovies, clearSearch, fetchMovieDetails]
   );
 
   return <MovieContext.Provider value={value}>{children}</MovieContext.Provider>;
