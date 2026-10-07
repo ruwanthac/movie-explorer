@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor, act } from '@testing-library/react';
 import App from './App';
 import { getTrendingMovies, searchMovies, getMovieDetails } from './api/tmdb';
 import { scrollSentinelIntoView } from './testUtils/intersectionObserver';
+import { withoutApiKey } from './testUtils/env';
 
 // Replace real network calls with a mock; keep the pure helpers as they are
 jest.mock('./api/tmdb', () => ({
@@ -485,6 +486,41 @@ describe('favorites', () => {
 
     expect(screen.getByText(/no favorites yet/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /discover movies/i })).toHaveAttribute('href', '/');
+  });
+});
+
+describe('status banners', () => {
+  beforeEach(() => signIn());
+
+  test('shows an offline banner while the connection is down', () => {
+    renderAt('/');
+    expect(screen.queryByText(/you're offline/i)).not.toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event('offline'));
+    });
+    expect(screen.getByText(/you're offline/i)).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event('online'));
+    });
+    expect(screen.queryByText(/you're offline/i)).not.toBeInTheDocument();
+  });
+
+  test('warns when the TMDb API key is not configured', () =>
+    withoutApiKey(() => {
+      renderAt('/');
+      expect(screen.getByText(/configuration needed/i)).toBeInTheDocument();
+      expect(screen.getByText(/REACT_APP_TMDB_API_KEY/)).toBeInTheDocument();
+    }));
+
+  test('error messages explain why a request failed', async () => {
+    getTrendingMovies.mockRejectedValue({ response: { status: 429 } });
+    renderAt('/');
+
+    expect(
+      await screen.findByText('Could not load trending movies. Too many requests. Please wait a moment and try again.')
+    ).toBeInTheDocument();
   });
 });
 
