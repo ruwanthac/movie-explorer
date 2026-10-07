@@ -19,6 +19,17 @@
       rel="stylesheet"
     />
     <title>Movie Explorer</title>
+    <style>
+      /* Respect users who prefer less motion: turn animations and transitions off */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

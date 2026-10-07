@@ -55,13 +55,6 @@ const getTheme = (mode) => {
             from: { opacity: 0, transform: 'translateY(8px)' },
             to: { opacity: 1, transform: 'none' },
           },
-          // Respect users who prefer less motion
-          '@media (prefers-reduced-motion: reduce)': {
-            '*, *::before, *::after': {
-              animationDuration: '0.01ms !important',
-              transitionDuration: '0.01ms !important',
-            },
-          },
         },
       },
       MuiButton: {
