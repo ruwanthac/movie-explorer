@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import axios from 'axios';
 import { getTrendingMovies, getMovieDetails, searchMovies as searchMoviesApi } from '../api/tmdb';
 import { getStoredItem, setStoredItem, removeStoredItem } from '../utils/storage';
@@ -22,6 +22,17 @@ const createInitialState = () => ({
   search: { ...initialListState, query: getStoredItem(STORAGE_KEYS.LAST_SEARCH, '') },
   // Movie details cached by id: { data, loading, error, notFound }
   details: {},
+  // Saved favorite movies, newest first
+  favorites: getStoredItem(STORAGE_KEYS.FAVORITES, []),
+});
+
+// Only the fields needed to show a movie card are saved for favorites
+const toFavorite = ({ id, title, poster_path, release_date, vote_average }) => ({
+  id,
+  title,
+  poster_path,
+  release_date,
+  vote_average,
 });
 
 export const ACTIONS = {
@@ -35,6 +46,9 @@ export const ACTIONS = {
   DETAILS_REQUEST: 'DETAILS_REQUEST',
   DETAILS_SUCCESS: 'DETAILS_SUCCESS',
   DETAILS_FAILURE: 'DETAILS_FAILURE',
+  FAVORITE_ADD: 'FAVORITE_ADD',
+  FAVORITE_REMOVE: 'FAVORITE_REMOVE',
+  FAVORITES_CLEAR: 'FAVORITES_CLEAR',
 };
 
 // Merges one page of TMDb results into a list.
@@ -116,6 +130,16 @@ export const movieReducer = (state, action) => {
         },
       };
 
+    case ACTIONS.FAVORITE_ADD:
+      if (state.favorites.some((movie) => movie.id === action.payload.id)) return state;
+      return { ...state, favorites: [toFavorite(action.payload), ...state.favorites] };
+
+    case ACTIONS.FAVORITE_REMOVE:
+      return { ...state, favorites: state.favorites.filter((movie) => movie.id !== action.payload) };
+
+    case ACTIONS.FAVORITES_CLEAR:
+      return { ...state, favorites: [] };
+
     default:
       return state;
   }
@@ -181,9 +205,32 @@ export const MovieProvider = ({ children }) => {
     removeStoredItem(STORAGE_KEYS.LAST_SEARCH);
   }, []);
 
+  // Keep favorites saved in localStorage whenever they change
+  useEffect(() => {
+    setStoredItem(STORAGE_KEYS.FAVORITES, state.favorites);
+  }, [state.favorites]);
+
+  // Fast lookup for "is this movie a favorite?" on every card
+  const favoriteIds = useMemo(() => new Set(state.favorites.map((movie) => movie.id)), [state.favorites]);
+  const isFavorite = useCallback((id) => favoriteIds.has(id), [favoriteIds]);
+
+  const addFavorite = useCallback((movie) => dispatch({ type: ACTIONS.FAVORITE_ADD, payload: movie }), []);
+  const removeFavorite = useCallback((id) => dispatch({ type: ACTIONS.FAVORITE_REMOVE, payload: id }), []);
+  const clearFavorites = useCallback(() => dispatch({ type: ACTIONS.FAVORITES_CLEAR }), []);
+
   const value = useMemo(
-    () => ({ ...state, fetchTrending, searchMovies, clearSearch, fetchMovieDetails }),
-    [state, fetchTrending, searchMovies, clearSearch, fetchMovieDetails]
+    () => ({
+      ...state,
+      fetchTrending,
+      searchMovies,
+      clearSearch,
+      fetchMovieDetails,
+      isFavorite,
+      addFavorite,
+      removeFavorite,
+      clearFavorites,
+    }),
+    [state, fetchTrending, searchMovies, clearSearch, fetchMovieDetails, isFavorite, addFavorite, removeFavorite, clearFavorites]
   );
 
   return <MovieContext.Provider value={value}>{children}</MovieContext.Provider>;
