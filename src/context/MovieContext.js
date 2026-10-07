@@ -1,6 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import axios from 'axios';
-import { getTrendingMovies, getMovieDetails, searchMovies as searchMoviesApi } from '../api/tmdb';
+import {
+  discoverMovies as discoverMoviesApi,
+  getGenres,
+  getMovieDetails,
+  getTrendingMovies,
+  searchMovies as searchMoviesApi,
+} from '../api/tmdb';
 import { describeError } from '../api/errors';
 import { getStoredItem, setStoredItem, removeStoredItem } from '../utils/storage';
 import { STORAGE_KEYS, TMDB_MAX_PAGES } from '../utils/constants';
@@ -17,12 +23,25 @@ const initialListState = {
   error: null,
 };
 
+export const EMPTY_FILTERS = { genre: '', year: '', minRating: 0 };
+
+// Number of filters the user has set, e.g. for a badge
+export const countActiveFilters = (filters) =>
+  [filters.genre, filters.year, filters.minRating > 0].filter(Boolean).length;
+
+// A stable string for a set of filters, used to spot responses for old filters
+const filtersKey = (filters) => JSON.stringify([filters.genre, filters.year, filters.minRating]);
+
 // The last search is restored from localStorage so it survives a page reload
 const createInitialState = () => ({
   trending: initialListState,
   search: { ...initialListState, query: getStoredItem(STORAGE_KEYS.LAST_SEARCH, '') },
   // Movie details cached by id: { data, loading, error, notFound }
   details: {},
+  // Genre / year / rating filters and the movies that match them
+  filters: EMPTY_FILTERS,
+  discover: initialListState,
+  genres: { items: [], loading: false, error: null },
   // Saved favorite movies, newest first
   favorites: getStoredItem(STORAGE_KEYS.FAVORITES, []),
 });
@@ -47,6 +66,13 @@ export const ACTIONS = {
   DETAILS_REQUEST: 'DETAILS_REQUEST',
   DETAILS_SUCCESS: 'DETAILS_SUCCESS',
   DETAILS_FAILURE: 'DETAILS_FAILURE',
+  FILTERS_SET: 'FILTERS_SET',
+  DISCOVER_REQUEST: 'DISCOVER_REQUEST',
+  DISCOVER_SUCCESS: 'DISCOVER_SUCCESS',
+  DISCOVER_FAILURE: 'DISCOVER_FAILURE',
+  GENRES_REQUEST: 'GENRES_REQUEST',
+  GENRES_SUCCESS: 'GENRES_SUCCESS',
+  GENRES_FAILURE: 'GENRES_FAILURE',
   FAVORITE_ADD: 'FAVORITE_ADD',
   FAVORITE_REMOVE: 'FAVORITE_REMOVE',
   FAVORITES_CLEAR: 'FAVORITES_CLEAR',
@@ -131,6 +157,32 @@ export const movieReducer = (state, action) => {
         },
       };
 
+    case ACTIONS.FILTERS_SET:
+      // New filters start a fresh list of results
+      return { ...state, filters: action.payload, discover: initialListState };
+
+    case ACTIONS.DISCOVER_REQUEST:
+      if (action.payload.key !== filtersKey(state.filters)) return state;
+      return { ...state, discover: { ...state.discover, loading: true, error: null } };
+
+    case ACTIONS.DISCOVER_SUCCESS:
+      // Ignore late responses for filters the user has already changed
+      if (action.payload.key !== filtersKey(state.filters)) return state;
+      return { ...state, discover: applyPage(state.discover, action.payload.data) };
+
+    case ACTIONS.DISCOVER_FAILURE:
+      if (action.payload.key !== filtersKey(state.filters)) return state;
+      return { ...state, discover: { ...state.discover, loading: false, error: action.payload.message } };
+
+    case ACTIONS.GENRES_REQUEST:
+      return { ...state, genres: { ...state.genres, loading: true, error: null } };
+
+    case ACTIONS.GENRES_SUCCESS:
+      return { ...state, genres: { items: action.payload, loading: false, error: null } };
+
+    case ACTIONS.GENRES_FAILURE:
+      return { ...state, genres: { ...state.genres, loading: false, error: action.payload } };
+
     case ACTIONS.FAVORITE_ADD:
       if (state.favorites.some((movie) => movie.id === action.payload.id)) return state;
       return { ...state, favorites: [toFavorite(action.payload), ...state.favorites] };
@@ -206,6 +258,35 @@ export const MovieProvider = ({ children }) => {
     removeStoredItem(STORAGE_KEYS.LAST_SEARCH);
   }, []);
 
+  const setFilters = useCallback((filters) => dispatch({ type: ACTIONS.FILTERS_SET, payload: filters }), []);
+
+  // Loads one page of movies matching the given filters
+  const discoverMovies = useCallback(async (filters, page = 1, signal) => {
+    const key = filtersKey(filters);
+    dispatch({ type: ACTIONS.DISCOVER_REQUEST, payload: { key } });
+    try {
+      const data = await discoverMoviesApi(filters, page, signal);
+      dispatch({ type: ACTIONS.DISCOVER_SUCCESS, payload: { key, data } });
+    } catch (error) {
+      if (axios.isCancel(error)) return;
+      dispatch({
+        type: ACTIONS.DISCOVER_FAILURE,
+        payload: { key, message: describeError('Could not load filtered movies.', error) },
+      });
+    }
+  }, []);
+
+  const fetchGenres = useCallback(async (signal) => {
+    dispatch({ type: ACTIONS.GENRES_REQUEST });
+    try {
+      const genres = await getGenres(signal);
+      dispatch({ type: ACTIONS.GENRES_SUCCESS, payload: genres });
+    } catch (error) {
+      if (axios.isCancel(error)) return;
+      dispatch({ type: ACTIONS.GENRES_FAILURE, payload: 'Could not load genres.' });
+    }
+  }, []);
+
   // Keep favorites saved in localStorage whenever they change
   useEffect(() => {
     setStoredItem(STORAGE_KEYS.FAVORITES, state.favorites);
@@ -226,12 +307,28 @@ export const MovieProvider = ({ children }) => {
       searchMovies,
       clearSearch,
       fetchMovieDetails,
+      setFilters,
+      discoverMovies,
+      fetchGenres,
       isFavorite,
       addFavorite,
       removeFavorite,
       clearFavorites,
     }),
-    [state, fetchTrending, searchMovies, clearSearch, fetchMovieDetails, isFavorite, addFavorite, removeFavorite, clearFavorites]
+    [
+      state,
+      fetchTrending,
+      searchMovies,
+      clearSearch,
+      fetchMovieDetails,
+      setFilters,
+      discoverMovies,
+      fetchGenres,
+      isFavorite,
+      addFavorite,
+      removeFavorite,
+      clearFavorites,
+    ]
   );
 
   return <MovieContext.Provider value={value}>{children}</MovieContext.Provider>;
