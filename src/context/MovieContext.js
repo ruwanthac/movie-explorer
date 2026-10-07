@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useReducer } from 'rea
 import axios from 'axios';
 import { getTrendingMovies, searchMovies as searchMoviesApi } from '../api/tmdb';
 import { getStoredItem, setStoredItem, removeStoredItem } from '../utils/storage';
-import { STORAGE_KEYS } from '../utils/constants';
+import { STORAGE_KEYS, TMDB_MAX_PAGES } from '../utils/constants';
 
 const MovieContext = createContext(null);
 
@@ -42,7 +42,7 @@ const applyPage = (list, data) => {
     ...list,
     items: data.page === 1 ? newItems : [...list.items, ...newItems],
     page: data.page,
-    totalPages: data.total_pages,
+    totalPages: Math.min(data.total_pages, TMDB_MAX_PAGES),
     totalResults: data.total_results ?? 0,
     loading: false,
     error: null,
