@@ -49,9 +49,8 @@ const Home = () => {
   const [input, setInput] = useState(search.query);
   const debouncedQuery = useDebounce(input.trim(), SEARCH_DELAY_MS);
 
-  // Latest search state, read inside the effect without re-running it on every update
-  const searchRef = useRef(search);
-  searchRef.current = search;
+  // The in-flight search request, so it can be cancelled when a newer one starts
+  const searchControllerRef = useRef(null);
 
   // Load the first page of trending movies once
   useEffect(() => {
@@ -61,25 +60,31 @@ const Home = () => {
     return () => controller.abort();
   }, [trending.page, fetchTrending]);
 
-  // Search when the user pauses typing. Changing the text again cancels the
-  // previous request, so results never arrive out of order.
+  // Search when the user pauses typing
   useEffect(() => {
-    const current = searchRef.current;
+    // Still typing - wait for the debounced value to catch up
+    if (debouncedQuery !== input.trim()) return;
 
     if (!debouncedQuery) {
-      if (current.query) clearSearch();
-      return undefined;
+      if (search.query) clearSearch();
+      return;
     }
 
-    // Results for this term are already loaded (e.g. coming back from a details page)
-    if (debouncedQuery === current.query && current.page > 0) return undefined;
+    // This term is already loaded, loading, or failed (failed searches are
+    // retried with the Retry button, not automatically)
+    if (debouncedQuery === search.query && (search.page > 0 || search.loading || search.error)) return;
 
-    const controller = new AbortController();
-    searchMovies(debouncedQuery, 1, controller.signal);
-    return () => controller.abort();
-  }, [debouncedQuery, searchMovies, clearSearch]);
+    // Cancel the previous request so results never arrive out of order
+    searchControllerRef.current?.abort();
+    searchControllerRef.current = new AbortController();
+    searchMovies(debouncedQuery, 1, searchControllerRef.current.signal);
+  }, [debouncedQuery, input, search.query, search.page, search.loading, search.error, searchMovies, clearSearch]);
+
+  // Cancel any pending search when leaving the page
+  useEffect(() => () => searchControllerRef.current?.abort(), []);
 
   const handleClear = () => {
+    searchControllerRef.current?.abort();
     setInput('');
     clearSearch();
   };
