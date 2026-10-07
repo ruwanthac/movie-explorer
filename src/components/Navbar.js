@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Box from '@mui/material/Box';
+import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -20,19 +21,31 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useColorMode } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useMovies } from '../context/MovieContext';
 
-const NAV_LINKS = [
-  { to: '/', label: 'Home', icon: <HomeIcon /> },
-  { to: '/favorites', label: 'Favorites', icon: <FavoriteIcon /> },
-];
 
 // Top navigation bar with the app name, page links, theme toggle and user menu
 const Navbar = () => {
   const { mode, toggleColorMode } = useColorMode();
   const { user, logout } = useAuth();
+  const { favorites } = useMovies();
   const navigate = useNavigate();
   const [menuAnchor, setMenuAnchor] = useState(null);
   const nextMode = mode === 'light' ? 'dark' : 'light';
+
+  const navLinks = [
+    { to: '/', label: 'Home', icon: <HomeIcon /> },
+    {
+      to: '/favorites',
+      label: 'Favorites',
+      // Badge shows how many movies are saved
+      icon: (
+        <Badge badgeContent={favorites.length} color="error" max={99}>
+          <FavoriteIcon />
+        </Badge>
+      ),
+    },
+  ];
 
   const handleLogout = () => {
     setMenuAnchor(null);
@@ -61,7 +74,7 @@ const Navbar = () => {
         {/* Pushes the links and actions to the right */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {NAV_LINKS.map(({ to, label, icon }) => (
+        {navLinks.map(({ to, label, icon }) => (
           <Button
             key={to}
             component={NavLink}

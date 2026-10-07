@@ -12,6 +12,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MovieIcon from '@mui/icons-material/Movie';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 import CastList from '../components/CastList';
+import FavoriteButton from '../components/FavoriteButton';
 import MovieDetailsSkeleton from '../components/MovieDetailsSkeleton';
 import { useMovies } from '../context/MovieContext';
 import { getImageUrl } from '../api/tmdb';
@@ -256,19 +257,33 @@ const MovieDetails = () => {
               {movie.overview || 'No overview available.'}
             </Typography>
 
-            {trailer && (
-              <Button
-                variant="contained"
-                color="error"
-                startIcon={<PlayArrowIcon />}
-                href={getYouTubeUrl(trailer.key)}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ mt: 3 }}
-              >
-                Watch trailer
-              </Button>
-            )}
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1.5,
+                mt: 3,
+                justifyContent: { xs: 'center', sm: 'flex-start' },
+              }}
+            >
+              {trailer && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<PlayArrowIcon />}
+                  href={getYouTubeUrl(trailer.key)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Watch trailer
+                </Button>
+              )}
+              <FavoriteButton
+                movie={movie}
+                variant="button"
+                sx={backdropUrl ? { bgcolor: 'rgba(0, 0, 0, 0.4)' } : undefined}
+              />
+            </Box>
           </Box>
         </Box>
       </Box>
