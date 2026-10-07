@@ -241,6 +241,7 @@ They cover login and protected routes, search (debounce, saved last search, erro
 - **Infinite scroll and "Load More" both exist.** Infinite scroll is the default (core requirement), and the bonus "Load More" button can be switched on with the toggle next to each list.
 - **Minimum rating filter** also requires at least 50 votes, so films with a single 10/10 vote don't flood the results.
 - **TMDb returns at most 500 pages** for any list, so loading stops there.
+- **The TMDb API key is visible in the deployed site.** Create React App builds environment variables into the JavaScript bundle, so anyone can read the key in the browser. This is normal for frontend-only apps using TMDb (keys are free and read-only). To hide it, requests would go through a small backend proxy, which is outside the scope of this task.
 - **Create React App** is used as the task requires. CRA is no longer actively maintained; a new project today would likely use Vite.
 
 ---
