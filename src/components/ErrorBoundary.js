@@ -2,7 +2,7 @@ import { Component } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 
 // Catches unexpected rendering errors anywhere below it and shows a friendly
 // page instead of a blank screen. Error boundaries must be class components.
