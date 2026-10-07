@@ -137,7 +137,21 @@ const MovieDetails = () => {
               backgroundImage: `url(${backdropUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center top',
-              opacity: 0.35,
+              opacity: 0.45,
+            }}
+          />
+        )}
+        {backdropUrl && (
+          // Darkens the backdrop so white text stays readable on bright images
+          <Box
+            aria-hidden="true"
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background: {
+                xs: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.85) 100%)',
+                sm: 'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.4) 100%)',
+              },
             }}
           />
         )}
