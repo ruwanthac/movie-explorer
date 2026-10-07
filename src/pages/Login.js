@@ -7,11 +7,11 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../context/AuthContext';
 import PosterWall from '../components/PosterWall';
+import AppLogo from '../components/AppLogo';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 // Login page with username and password fields
@@ -76,7 +76,7 @@ const Login = () => {
         }}
       >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <MovieFilterIcon color="primary" sx={{ fontSize: 48 }} />
+          <AppLogo size={56} sx={{ mx: 'auto', mb: 1.5 }} />
           <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
             Sign in
           </Typography>

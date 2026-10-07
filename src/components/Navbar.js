@@ -14,12 +14,12 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import HomeIcon from '@mui/icons-material/Home';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AppLogo from './AppLogo';
 import { useColorMode } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useMovies } from '../context/MovieContext';
@@ -73,7 +73,7 @@ const Navbar = () => {
           to="/"
           sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'inherit', textDecoration: 'none' }}
         >
-          <MovieFilterIcon color="primary" />
+          <AppLogo size={30} />
           <Typography
             variant="h6"
             component="span"
