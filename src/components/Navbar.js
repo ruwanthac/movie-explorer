@@ -1,4 +1,5 @@
-import { Link as RouterLink, NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { Link as RouterLink, NavLink, useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -6,22 +7,38 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
 import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import HomeIcon from '@mui/icons-material/Home';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useColorMode } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home', icon: <HomeIcon /> },
   { to: '/favorites', label: 'Favorites', icon: <FavoriteIcon /> },
 ];
 
-// Top navigation bar with the app name, page links and the light/dark mode toggle
+// Top navigation bar with the app name, page links, theme toggle and user menu
 const Navbar = () => {
   const { mode, toggleColorMode } = useColorMode();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [menuAnchor, setMenuAnchor] = useState(null);
   const nextMode = mode === 'light' ? 'dark' : 'light';
+
+  const handleLogout = () => {
+    setMenuAnchor(null);
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <AppBar position="sticky" color="default" elevation={1}>
@@ -77,6 +94,41 @@ const Navbar = () => {
             {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
         </Tooltip>
+
+        {user && (
+          <>
+            <Tooltip title="Account">
+              <IconButton
+                onClick={(event) => setMenuAnchor(event.currentTarget)}
+                aria-label="Account menu"
+                aria-controls={menuAnchor ? 'account-menu' : undefined}
+                aria-haspopup="true"
+                size="small"
+              >
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.95rem' }}>
+                  {user.username.charAt(0).toUpperCase()}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+            <Menu
+              id="account-menu"
+              anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={() => setMenuAnchor(null)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem disabled>Signed in as {user.username}</MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon fontSize="small" />
+                </ListItemIcon>
+                Logout
+              </MenuItem>
+            </Menu>
+          </>
+        )}
       </Toolbar>
     </AppBar>
   );
