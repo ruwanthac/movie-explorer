@@ -58,9 +58,10 @@ const FavoriteButton = ({ movie, variant = 'icon', onDarkBackground = false, sx 
         aria-label={label}
         size="small"
         sx={{
-          color: saved ? 'error.main' : '#fff',
-          bgcolor: 'rgba(0, 0, 0, 0.55)',
-          '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.75)' },
+          color: saved ? '#ff5252' : '#fff',
+          bgcolor: 'rgba(0, 0, 0, 0.45)',
+          backdropFilter: 'blur(6px)',
+          '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.7)' },
           ...sx,
         }}
       >
