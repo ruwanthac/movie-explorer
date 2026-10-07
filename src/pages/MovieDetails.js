@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
-import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StarIcon from '@mui/icons-material/Star';
@@ -12,6 +11,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MovieIcon from '@mui/icons-material/Movie';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 import CastList from '../components/CastList';
+import ErrorMessage from '../components/ErrorMessage';
 import FavoriteButton from '../components/FavoriteButton';
 import MovieDetailsSkeleton from '../components/MovieDetailsSkeleton';
 import { useMovies } from '../context/MovieContext';
@@ -84,16 +84,7 @@ const MovieDetails = () => {
     return (
       <Box>
         {backButton}
-        <Alert
-          severity="error"
-          action={
-            <Button color="inherit" size="small" onClick={() => fetchMovieDetails(id)}>
-              Retry
-            </Button>
-          }
-        >
-          {entry.error}
-        </Alert>
+        <ErrorMessage message={entry.error} onRetry={() => fetchMovieDetails(id)} />
       </Box>
     );
   }

@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import MovieGrid from './MovieGrid';
+import ErrorMessage from './ErrorMessage';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 import { PAGINATION_MODES } from '../utils/constants';
 
@@ -29,18 +29,7 @@ const PaginatedMovieGrid = ({ list, onLoadMore, onRetry, mode, emptyState = null
 
   // Nothing loaded yet and the first request failed
   if (error && items.length === 0) {
-    return (
-      <Alert
-        severity="error"
-        action={
-          <Button color="inherit" size="small" onClick={onRetry}>
-            Retry
-          </Button>
-        }
-      >
-        {error}
-      </Alert>
-    );
+    return <ErrorMessage message={error} onRetry={onRetry} />;
   }
 
   if (isEmpty) return emptyState;
@@ -55,17 +44,7 @@ const PaginatedMovieGrid = ({ list, onLoadMore, onRetry, mode, emptyState = null
 
         {/* A later page failed - keep what is already shown and offer a retry */}
         {error && (
-          <Alert
-            severity="error"
-            sx={{ width: '100%', maxWidth: 520 }}
-            action={
-              <Button color="inherit" size="small" onClick={onLoadMore}>
-                Retry
-              </Button>
-            }
-          >
-            {error}
-          </Alert>
+          <ErrorMessage message={error} onRetry={onLoadMore} sx={{ width: '100%', maxWidth: 520 }} />
         )}
 
         {mode === PAGINATION_MODES.BUTTON && hasMore && !loading && !error && (

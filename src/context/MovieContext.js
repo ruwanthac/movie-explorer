@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import axios from 'axios';
 import { getTrendingMovies, getMovieDetails, searchMovies as searchMoviesApi } from '../api/tmdb';
+import { describeError } from '../api/errors';
 import { getStoredItem, setStoredItem, removeStoredItem } from '../utils/storage';
 import { STORAGE_KEYS, TMDB_MAX_PAGES } from '../utils/constants';
 
@@ -160,7 +161,7 @@ export const MovieProvider = ({ children }) => {
       if (axios.isCancel(error)) return;
       dispatch({
         type: ACTIONS.TRENDING_FAILURE,
-        payload: 'Could not load trending movies. Please try again.',
+        payload: describeError('Could not load trending movies.', error),
       });
     }
   }, []);
@@ -175,7 +176,7 @@ export const MovieProvider = ({ children }) => {
       if (axios.isCancel(error)) return;
       dispatch({
         type: ACTIONS.SEARCH_FAILURE,
-        payload: { query, message: 'Could not load search results. Please try again.' },
+        payload: { query, message: describeError('Could not load search results.', error) },
       });
     }
   }, []);
@@ -194,7 +195,7 @@ export const MovieProvider = ({ children }) => {
         payload: {
           id,
           notFound,
-          message: notFound ? 'Movie not found.' : 'Could not load movie details. Please try again.',
+          message: notFound ? 'Movie not found.' : describeError('Could not load movie details.', error),
         },
       });
     }
