@@ -1,20 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import SearchIcon from '@mui/icons-material/Search';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
-import MovieGrid from '../components/MovieGrid';
+import PaginatedMovieGrid from '../components/PaginatedMovieGrid';
+import PaginationModeToggle from '../components/PaginationModeToggle';
 import SearchBar from '../components/SearchBar';
 import useDebounce from '../hooks/useDebounce';
+import usePaginationMode from '../hooks/usePaginationMode';
 import { useMovies } from '../context/MovieContext';
 
 const SEARCH_DELAY_MS = 500;
 
-// Heading row used above each list of movies
-const SectionHeader = ({ id, icon, title, subtitle }) => (
+// Heading row used above each list of movies, with optional controls on the right
+const SectionHeader = ({ id, icon, title, subtitle, action }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
     {icon}
     <Typography id={id} variant="h6" component="h2" sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
@@ -25,20 +25,18 @@ const SectionHeader = ({ id, icon, title, subtitle }) => (
         {subtitle}
       </Typography>
     )}
+    {action && <Box sx={{ ml: 'auto' }}>{action}</Box>}
   </Box>
 );
 
-const ErrorAlert = ({ message, onRetry }) => (
-  <Alert
-    severity="error"
-    action={
-      <Button color="inherit" size="small" onClick={onRetry}>
-        Retry
-      </Button>
-    }
-  >
-    {message}
-  </Alert>
+const NoResults = () => (
+  <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
+    <SearchOffIcon sx={{ fontSize: 56, mb: 1 }} />
+    <Typography variant="h6" component="p">
+      No movies found
+    </Typography>
+    <Typography variant="body2">Check the spelling or try a different title.</Typography>
+  </Box>
 );
 
 // Home page - movie search plus this week's trending movies
@@ -48,6 +46,8 @@ const Home = () => {
   // The input starts with the last search, restored from localStorage
   const [input, setInput] = useState(search.query);
   const debouncedQuery = useDebounce(input.trim(), SEARCH_DELAY_MS);
+
+  const [paginationMode, setPaginationMode] = usePaginationMode();
 
   // The in-flight search request, so it can be cancelled when a newer one starts
   const searchControllerRef = useRef(null);
@@ -89,9 +89,18 @@ const Home = () => {
     clearSearch();
   };
 
+  const loadMoreSearch = useCallback(
+    () => searchMovies(search.query, search.page + 1),
+    [searchMovies, search.query, search.page]
+  );
+  const loadMoreTrending = useCallback(
+    () => fetchTrending(trending.page + 1),
+    [fetchTrending, trending.page]
+  );
+
   const isSearching = Boolean(search.query);
   const searchLoaded = search.page > 0 && !search.loading;
-  const noResults = searchLoaded && !search.error && search.items.length === 0;
+  const modeToggle = <PaginationModeToggle mode={paginationMode} onChange={setPaginationMode} />;
 
   return (
     <Box>
@@ -114,23 +123,15 @@ const Home = () => {
             icon={<SearchIcon color="primary" />}
             title={`Results for "${search.query}"`}
             subtitle={searchLoaded && !search.error ? `${search.totalResults.toLocaleString()} found` : null}
+            action={modeToggle}
           />
-
-          {search.error && (
-            <ErrorAlert message={search.error} onRetry={() => searchMovies(search.query, 1)} />
-          )}
-
-          {noResults && (
-            <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
-              <SearchOffIcon sx={{ fontSize: 56, mb: 1 }} />
-              <Typography variant="h6" component="p">
-                No movies found
-              </Typography>
-              <Typography variant="body2">Check the spelling or try a different title.</Typography>
-            </Box>
-          )}
-
-          {!search.error && <MovieGrid movies={search.items} loading={search.loading || search.page === 0} />}
+          <PaginatedMovieGrid
+            list={search}
+            mode={paginationMode}
+            onLoadMore={loadMoreSearch}
+            onRetry={() => searchMovies(search.query, 1)}
+            emptyState={<NoResults />}
+          />
         </Box>
       ) : (
         <Box component="section" aria-labelledby="trending-heading">
@@ -138,13 +139,14 @@ const Home = () => {
             id="trending-heading"
             icon={<WhatshotIcon color="error" />}
             title="Trending this week"
+            action={modeToggle}
           />
-
-          {trending.error ? (
-            <ErrorAlert message={trending.error} onRetry={() => fetchTrending(1)} />
-          ) : (
-            <MovieGrid movies={trending.items} loading={trending.loading || trending.page === 0} />
-          )}
+          <PaginatedMovieGrid
+            list={trending}
+            mode={paginationMode}
+            onLoadMore={loadMoreTrending}
+            onRetry={() => fetchTrending(1)}
+          />
         </Box>
       )}
     </Box>
