@@ -354,13 +354,30 @@ describe('movie details page', () => {
     expect(cast).toHaveTextContent('Joseph Gordon-Levitt');
   });
 
-  test('links to the YouTube trailer, not a clip', async () => {
+  test('plays the trailer (not a clip) in a pop-up player', async () => {
     getMovieDetails.mockResolvedValue(inception);
     renderAt('/movie/27205');
 
-    const trailer = await screen.findByRole('link', { name: /watch trailer/i });
-    expect(trailer).toHaveAttribute('href', 'https://www.youtube.com/watch?v=YoHD9XEInc0');
-    expect(trailer).toHaveAttribute('target', '_blank');
+    fireEvent.click(await screen.findByRole('button', { name: /watch trailer/i }));
+
+    const dialog = screen.getByRole('dialog', { name: /inception/i });
+    const player = within(dialog).getByTitle('Inception trailer');
+    expect(player).toHaveAttribute('src', expect.stringContaining('youtube-nocookie.com/embed/YoHD9XEInc0'));
+    expect(within(dialog).getByRole('link', { name: /watch on youtube/i })).toHaveAttribute(
+      'href',
+      'https://www.youtube.com/watch?v=YoHD9XEInc0'
+    );
+  });
+
+  test('closing the trailer removes the player so the video stops', async () => {
+    getMovieDetails.mockResolvedValue(inception);
+    renderAt('/movie/27205');
+
+    fireEvent.click(await screen.findByRole('button', { name: /watch trailer/i }));
+    fireEvent.click(screen.getByRole('button', { name: /close trailer/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.queryByTitle('Inception trailer')).not.toBeInTheDocument();
   });
 
   test('hides the trailer button when there is no trailer', async () => {
@@ -368,7 +385,7 @@ describe('movie details page', () => {
     renderAt('/movie/27205');
 
     await screen.findByRole('heading', { level: 1, name: /inception/i });
-    expect(screen.queryByRole('link', { name: /watch trailer/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /watch trailer/i })).not.toBeInTheDocument();
   });
 
   test('shows "Movie not found" for an id TMDb does not know', async () => {

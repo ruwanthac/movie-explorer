@@ -4,6 +4,7 @@ import {
   formatRuntime,
   getReleaseYear,
   getTrailer,
+  getYouTubeEmbedUrl,
 } from './formatters';
 
 test('getReleaseYear', () => {
@@ -44,4 +45,10 @@ describe('getTrailer', () => {
     expect(getTrailer([video('Trailer', true, 'Vimeo')])).toBeNull();
     expect(getTrailer()).toBeNull();
   });
+});
+
+test('getYouTubeEmbedUrl uses the privacy-enhanced player', () => {
+  expect(getYouTubeEmbedUrl('abc123')).toBe(
+    'https://www.youtube-nocookie.com/embed/abc123?autoplay=1&rel=0&modestbranding=1'
+  );
 });
