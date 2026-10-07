@@ -1,8 +1,16 @@
+import Typography from '@mui/material/Typography';
+import { ColorModeProvider } from './context/ThemeContext';
+import Layout from './components/Layout';
+
 function App() {
   return (
-    <div>
-      <h1>Movie Explorer</h1>
-    </div>
+    <ColorModeProvider>
+      <Layout>
+        <Typography variant="h5" component="h1">
+          Discover your favorite films
+        </Typography>
+      </Layout>
+    </ColorModeProvider>
   );
 }
 
