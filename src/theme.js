@@ -20,6 +20,17 @@ const getTheme = (mode) =>
     shape: {
       borderRadius: 10,
     },
+    components: {
+      // Clear focus outline for keyboard users (not shown for mouse clicks)
+      MuiCssBaseline: {
+        styleOverrides: (theme) => ({
+          '*:focus-visible': {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        }),
+      },
+    },
     typography: {
       fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
       h1: { fontWeight: 700 },

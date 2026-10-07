@@ -11,6 +11,7 @@ import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../context/AuthContext';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 // Login page with username and password fields
 const Login = () => {
@@ -22,6 +23,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  useDocumentTitle('Sign in');
 
   // Send the user back to the page they originally asked for
   const redirectTo = location.state?.from?.pathname || '/';

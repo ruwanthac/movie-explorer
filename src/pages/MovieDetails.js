@@ -16,6 +16,7 @@ import FavoriteButton from '../components/FavoriteButton';
 import TrailerDialog from '../components/TrailerDialog';
 import MovieDetailsSkeleton from '../components/MovieDetailsSkeleton';
 import { useMovies } from '../context/MovieContext';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import { getImageUrl } from '../api/tmdb';
 import { BACKDROP_SIZE } from '../utils/constants';
 import {
@@ -57,6 +58,11 @@ const MovieDetails = () => {
   const validId = isValidId(id);
   const hasData = Boolean(movie);
 
+  const notFound = !validId || entry?.notFound;
+  useDocumentTitle(
+    notFound ? 'Movie not found' : movie ? `${movie.title} (${getReleaseYear(movie.release_date)})` : null
+  );
+
   // Load the movie unless it is already cached from an earlier visit
   useEffect(() => {
     if (!validId || hasData) return undefined;
@@ -77,7 +83,7 @@ const MovieDetails = () => {
     </Button>
   );
 
-  if (!validId || entry?.notFound) {
+  if (notFound) {
     return <NotFoundMessage />;
   }
 
@@ -114,7 +120,8 @@ const MovieDetails = () => {
       <Box
         sx={{
           position: 'relative',
-          borderRadius: 3,
+          // Edge to edge on phones, so no rounded corners there
+          borderRadius: { xs: 0, sm: 3 },
           overflow: 'hidden',
           mx: { xs: -2, sm: 0 },
           color: backdropUrl ? '#fff' : 'text.primary',
@@ -130,7 +137,21 @@ const MovieDetails = () => {
               backgroundImage: `url(${backdropUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center top',
-              opacity: 0.35,
+              opacity: 0.45,
+            }}
+          />
+        )}
+        {backdropUrl && (
+          // Darkens the backdrop so white text stays readable on bright images
+          <Box
+            aria-hidden="true"
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background: {
+                xs: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.85) 100%)',
+                sm: 'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.4) 100%)',
+              },
             }}
           />
         )}
@@ -269,11 +290,7 @@ const MovieDetails = () => {
                   Watch trailer
                 </Button>
               )}
-              <FavoriteButton
-                movie={movie}
-                variant="button"
-                sx={backdropUrl ? { bgcolor: 'rgba(0, 0, 0, 0.4)' } : undefined}
-              />
+              <FavoriteButton movie={movie} variant="button" onDarkBackground={Boolean(backdropUrl)} />
             </Box>
           </Box>
         </Box>
