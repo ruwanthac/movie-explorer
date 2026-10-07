@@ -12,23 +12,22 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import MovieGrid from '../components/MovieGrid';
+import EmptyState from '../components/EmptyState';
 import { useMovies } from '../context/MovieContext';
 import { useNotification } from '../context/NotificationContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const EmptyFavorites = () => (
-  <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
-    <FavoriteBorderIcon sx={{ fontSize: 64, mb: 1 }} />
-    <Typography variant="h6" component="p" color="text.primary">
-      No favorites yet
-    </Typography>
-    <Typography variant="body2" sx={{ mb: 3 }}>
-      Tap the heart on any movie to save it here.
-    </Typography>
-    <Button component={RouterLink} to="/" variant="contained">
-      Discover movies
-    </Button>
-  </Box>
+  <EmptyState
+    icon={<FavoriteBorderIcon />}
+    title="No favorites yet"
+    hint="Tap the heart on any movie to save it here."
+    action={
+      <Button component={RouterLink} to="/" variant="contained" size="large">
+        Discover movies
+      </Button>
+    }
+  />
 );
 
 // Lists the movies the user has saved, stored in localStorage

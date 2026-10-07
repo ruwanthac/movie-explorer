@@ -20,37 +20,65 @@ const MovieCard = ({ movie }) => {
   const year = getReleaseYear(movie.release_date);
 
   return (
-    <Card sx={{ height: '100%', position: 'relative' }}>
+    <Card
+      sx={{
+        height: '100%',
+        position: 'relative',
+        animation: 'fadeInUp 0.35s ease both',
+        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+        // Lift the card and zoom the poster slightly on hover (mouse devices only)
+        '@media (hover: hover)': {
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 12px 28px rgba(0, 0, 0, 0.6)'
+                : '0 12px 28px rgba(15, 23, 42, 0.18)',
+          },
+          '&:hover .movie-card-poster': { transform: 'scale(1.05)' },
+        },
+      }}
+    >
       <CardActionArea
         component={RouterLink}
         to={`/movie/${movie.id}`}
         sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
       >
-        {posterUrl ? (
-          <Box
-            component="img"
-            src={posterUrl}
-            alt={`${movie.title} poster`}
-            loading="lazy"
-            sx={{ width: '100%', aspectRatio: POSTER_RATIO, objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          // Placeholder for movies without a poster
-          <Box
-            role="img"
-            aria-label={`${movie.title} has no poster`}
-            sx={{
-              aspectRatio: POSTER_RATIO,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'action.hover',
-              color: 'text.disabled',
-            }}
-          >
-            <MovieIcon sx={{ fontSize: 56 }} />
-          </Box>
-        )}
+        {/* overflow hidden keeps the zoomed poster inside its frame */}
+        <Box sx={{ overflow: 'hidden', aspectRatio: POSTER_RATIO }}>
+          {posterUrl ? (
+            <Box
+              component="img"
+              className="movie-card-poster"
+              src={posterUrl}
+              alt={`${movie.title} poster`}
+              loading="lazy"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+                transition: 'transform 0.4s ease',
+              }}
+            />
+          ) : (
+            // Placeholder for movies without a poster
+            <Box
+              role="img"
+              aria-label={`${movie.title} has no poster`}
+              sx={{
+                aspectRatio: POSTER_RATIO,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'action.hover',
+                color: 'text.disabled',
+              }}
+            >
+              <MovieIcon sx={{ fontSize: 56 }} />
+            </Box>
+          )}
+        </Box>
 
         {/* Rating badge in the top-right corner of the poster */}
         <Box
@@ -63,8 +91,10 @@ const MovieCard = ({ movie }) => {
             gap: 0.25,
             px: 0.75,
             py: 0.25,
-            borderRadius: 1,
-            bgcolor: 'rgba(0, 0, 0, 0.75)',
+            borderRadius: 999,
+            // Frosted glass so the badge stays readable on any poster
+            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(6px)',
             color: '#fff',
             fontSize: '0.8rem',
             fontWeight: 700,
@@ -80,7 +110,14 @@ const MovieCard = ({ movie }) => {
             variant="subtitle2"
             component="h3"
             title={movie.title}
-            sx={{ fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.3,
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
           >
             {movie.title}
           </Typography>

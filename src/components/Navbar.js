@@ -7,18 +7,19 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Box from '@mui/material/Box';
+import { alpha } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import HomeIcon from '@mui/icons-material/Home';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AppLogo from './AppLogo';
 import { useColorMode } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useMovies } from '../context/MovieContext';
@@ -54,18 +55,29 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="sticky" color="default" elevation={1}>
+    <AppBar
+      position="sticky"
+      color="default"
+      elevation={0}
+      sx={{
+        // Frosted glass: content blurs as it scrolls underneath
+        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.72),
+        backdropFilter: 'saturate(180%) blur(14px)',
+        borderBottom: 1,
+        borderColor: 'divider',
+      }}
+    >
       <Toolbar sx={{ gap: { xs: 0.5, sm: 1 } }}>
         <Box
           component={RouterLink}
           to="/"
           sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'inherit', textDecoration: 'none' }}
         >
-          <MovieFilterIcon color="primary" />
+          <AppLogo size={30} />
           <Typography
             variant="h6"
             component="span"
-            sx={{ fontWeight: 700, fontSize: { xs: '1.05rem', sm: '1.25rem' } }}
+            sx={{ fontWeight: 800, letterSpacing: '-0.02em', fontSize: { xs: '1.05rem', sm: '1.25rem' } }}
           >
             Movie Explorer
           </Typography>
@@ -85,8 +97,23 @@ const Navbar = () => {
             sx={{
               minWidth: 0,
               px: { xs: 1, sm: 1.5 },
-              // NavLink adds the "active" class to the link for the current page
+              position: 'relative',
+              color: 'text.secondary',
+              '&:hover': { color: 'text.primary' },
+              // NavLink adds the "active" class to the link for the current page,
+              // shown with the primary colour and a short underline
               '&.active': { color: 'primary.main' },
+              '&.active::after': {
+                content: '""',
+                position: 'absolute',
+                left: '50%',
+                bottom: 2,
+                width: 18,
+                height: 3,
+                borderRadius: 2,
+                bgcolor: 'primary.main',
+                transform: 'translateX(-50%)',
+              },
               '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 } },
             }}
             startIcon={icon}
