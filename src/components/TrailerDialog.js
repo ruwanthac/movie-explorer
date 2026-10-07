@@ -25,7 +25,7 @@ const TrailerDialog = ({ open, onClose, trailer, movieTitle }) => {
       fullWidth
       maxWidth="md"
       aria-labelledby="trailer-dialog-title"
-      slotProps={{ paper: { sx: { bgcolor: '#000', color: '#fff' } } }}
+      slotProps={{ paper: { sx: { bgcolor: '#000', color: '#fff', borderRadius: fullScreen ? 0 : undefined } } }}
     >
       <DialogTitle
         id="trailer-dialog-title"

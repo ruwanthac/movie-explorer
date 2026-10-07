@@ -13,6 +13,7 @@ import SearchOffIcon from '@mui/icons-material/SearchOff';
 import PaginatedMovieGrid from '../components/PaginatedMovieGrid';
 import PaginationModeToggle from '../components/PaginationModeToggle';
 import FilterPanel from '../components/FilterPanel';
+import FeaturedBanner from '../components/FeaturedBanner';
 import SearchBar from '../components/SearchBar';
 import useDebounce from '../hooks/useDebounce';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -174,8 +175,13 @@ const Home = () => {
     </Button>
   );
 
+  // The banner only shows while browsing trending movies
+  const showBanner = !isSearching && !filtersActive && !trending.error;
+
   return (
     <Box>
+      {showBanner && <FeaturedBanner movie={trending.items[0]} loading={trending.page === 0} />}
+
       <Typography
         variant="h4"
         component="h1"
