@@ -8,3 +8,6 @@ import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
 Object.assign(global, { TextEncoder, TextDecoder });
+
+// jsdom does not implement scrolling, which ScrollToTop calls on every route change
+window.scrollTo = jest.fn();
