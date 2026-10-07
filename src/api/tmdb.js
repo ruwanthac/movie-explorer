@@ -64,6 +64,32 @@ export const getMovieDetails = async (movieId, signal) => {
   return data;
 };
 
+// The official list of movie genres, used for the genre filter
+export const getGenres = async (signal) => {
+  const { data } = await tmdb.get('/genre/movie/list', { signal });
+  return data.genres;
+};
+
+// Minimum number of votes before a rating filter counts a movie,
+// so a film with a single 10/10 vote does not top the results
+const MIN_VOTES_FOR_RATING_FILTER = 50;
+
+// Browse movies by genre, release year and minimum rating (paginated).
+// `filters` is { genre, year, minRating }; empty values are ignored.
+export const discoverMovies = async (filters, page = 1, signal) => {
+  const params = { page, sort_by: 'popularity.desc', include_adult: false };
+
+  if (filters.genre) params.with_genres = filters.genre;
+  if (filters.year) params.primary_release_year = filters.year;
+  if (filters.minRating > 0) {
+    params['vote_average.gte'] = filters.minRating;
+    params['vote_count.gte'] = MIN_VOTES_FOR_RATING_FILTER;
+  }
+
+  const { data } = await tmdb.get('/discover/movie', { params, signal });
+  return data;
+};
+
 // Builds a full image URL from a TMDb image path, or returns null if there is no image
 export const getImageUrl = (path, size = POSTER_SIZE) =>
   path ? `${TMDB_IMAGE_BASE_URL}/${size}${path}` : null;
