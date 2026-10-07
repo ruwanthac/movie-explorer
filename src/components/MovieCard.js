@@ -6,14 +6,15 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import StarIcon from '@mui/icons-material/Star';
 import MovieIcon from '@mui/icons-material/Movie';
+import FavoriteButton from './FavoriteButton';
 import { getImageUrl } from '../api/tmdb';
 import { getReleaseYear, formatRating } from '../utils/formatters';
 
 // Posters on TMDb use a 2:3 aspect ratio
 const POSTER_RATIO = '2 / 3';
 
-// A single movie in the grid: poster, title, release year and rating.
-// The whole card links to the movie's details page.
+// A single movie in the grid: poster, title, release year, rating and a
+// favorite button. The card links to the movie's details page.
 const MovieCard = ({ movie }) => {
   const posterUrl = getImageUrl(movie.poster_path);
   const year = getReleaseYear(movie.release_date);
@@ -88,6 +89,9 @@ const MovieCard = ({ movie }) => {
           </Typography>
         </CardContent>
       </CardActionArea>
+
+      {/* Kept outside the link so the heart is its own button */}
+      <FavoriteButton movie={movie} sx={{ position: 'absolute', top: 6, left: 6 }} />
     </Card>
   );
 };
