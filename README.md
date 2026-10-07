@@ -4,6 +4,8 @@ A responsive React web app to search for movies, view their details and discover
 
 **🔗 Live demo:** [movie-explorer-wheat-mu.vercel.app](https://movie-explorer-wheat-mu.vercel.app)
 
+**📦 Repository:** [GitLab](https://gitlab.com/ruwantha-bandara/movie-explorer) · mirrored on [GitHub](https://github.com/ruwanthac/movie-explorer)
+
 > Sign in with any username (3+ characters) and password (6+ characters).
 
 ![Home page with the featured movie banner](docs/screenshots/home.jpg)
@@ -21,6 +23,7 @@ A responsive React web app to search for movies, view their details and discover
 - [State management](#state-management)
 - [Testing](#testing)
 - [Notes and design decisions](#notes-and-design-decisions)
+- [Development workflow](#development-workflow)
 - [Author](#author)
 
 ---
@@ -111,7 +114,7 @@ A responsive React web app to search for movies, view their details and discover
 ### 2. Install and configure
 
 ```bash
-git clone https://github.com/ruwanthac/movie-explorer.git
+git clone https://gitlab.com/ruwantha-bandara/movie-explorer.git
 cd movie-explorer
 npm install
 
@@ -245,6 +248,20 @@ They cover login and protected routes, search (debounce, saved last search, erro
 - **TMDb returns at most 500 pages** for any list, so loading stops there.
 - **The TMDb API key is visible in the deployed site.** Create React App builds environment variables into the JavaScript bundle, so anyone can read the key in the browser. This is normal for frontend-only apps using TMDb (keys are free and read-only). To hide it, requests would go through a small backend proxy, which is outside the scope of this task.
 - **Create React App** is used as the task requires. CRA is no longer actively maintained; a new project today would likely use Vite.
+
+---
+
+## Development workflow
+
+The project was built feature by feature using a Git Flow style branching model:
+
+- **`main`**: production. Every merge deploys to Vercel. Releases are tagged (`v1.0.0`).
+- **`develop`**: integration branch.
+- **`feature/*`**, **`docs/*`**, **`chore/*`**: one branch per feature, merged into `develop` through a pull request with a merge commit, so each feature's individual commits stay visible.
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `test:`, `docs:`, `style:`, `refactor:`, `chore:`).
+
+The full history, including every merge, is in both repositories. The **pull requests** with a description of each feature are on GitHub: [github.com/ruwanthac/movie-explorer/pulls?q=is:pr](https://github.com/ruwanthac/movie-explorer/pulls?q=is%3Apr).
 
 ---
 
