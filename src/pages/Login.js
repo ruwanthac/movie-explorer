@@ -11,6 +11,7 @@ import MovieFilterIcon from '@mui/icons-material/MovieFilter';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../context/AuthContext';
+import PosterWall from '../components/PosterWall';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 // Login page with username and password fields
@@ -62,7 +63,18 @@ const Login = () => {
         px: 2,
       }}
     >
-      <Paper elevation={3} sx={{ width: '100%', maxWidth: 400, p: { xs: 3, sm: 4 } }}>
+      <PosterWall />
+      <Paper
+        elevation={0}
+        sx={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: 400,
+          p: { xs: 3, sm: 4 },
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.5)',
+          animation: 'fadeInUp 0.4s ease both',
+        }}
+      >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <MovieFilterIcon color="primary" sx={{ fontSize: 48 }} />
           <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
@@ -111,7 +123,7 @@ const Login = () => {
               },
             }}
           />
-          <Button type="submit" variant="contained" size="large" fullWidth sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" size="large" fullWidth sx={{ mt: 3 }}>
             Sign in
           </Button>
         </Box>
