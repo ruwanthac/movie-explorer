@@ -19,9 +19,10 @@ export const getTrendingMovies = async (page = 1, signal) => {
 };
 
 // Search movies by title (paginated)
-export const searchMovies = async (query, page = 1) => {
+export const searchMovies = async (query, page = 1, signal) => {
   const { data } = await tmdb.get('/search/movie', {
     params: { query, page, include_adult: false },
+    signal,
   });
   return data;
 };
