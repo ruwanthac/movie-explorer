@@ -13,4 +13,14 @@ export const STORAGE_KEYS = {
   THEME: 'movieExplorer.theme',
   LAST_SEARCH: 'movieExplorer.lastSearch',
   FAVORITES: 'movieExplorer.favorites',
+  PAGINATION_MODE: 'movieExplorer.paginationMode',
+};
+
+// TMDb never returns more than 500 pages for a list
+export const TMDB_MAX_PAGES = 500;
+
+// How more results are loaded: automatically on scroll, or with a button
+export const PAGINATION_MODES = {
+  SCROLL: 'scroll',
+  BUTTON: 'button',
 };
