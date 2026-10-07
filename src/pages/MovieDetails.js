@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -13,6 +13,7 @@ import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied
 import CastList from '../components/CastList';
 import ErrorMessage from '../components/ErrorMessage';
 import FavoriteButton from '../components/FavoriteButton';
+import TrailerDialog from '../components/TrailerDialog';
 import MovieDetailsSkeleton from '../components/MovieDetailsSkeleton';
 import { useMovies } from '../context/MovieContext';
 import { getImageUrl } from '../api/tmdb';
@@ -23,7 +24,6 @@ import {
   formatRuntime,
   getReleaseYear,
   getTrailer,
-  getYouTubeUrl,
 } from '../utils/formatters';
 
 // TMDb ids are positive whole numbers
@@ -50,6 +50,7 @@ const MovieDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { details, fetchMovieDetails } = useMovies();
+  const [trailerOpen, setTrailerOpen] = useState(false);
 
   const entry = details[id];
   const movie = entry?.data;
@@ -262,9 +263,8 @@ const MovieDetails = () => {
                   variant="contained"
                   color="error"
                   startIcon={<PlayArrowIcon />}
-                  href={getYouTubeUrl(trailer.key)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => setTrailerOpen(true)}
+                  aria-haspopup="dialog"
                 >
                   Watch trailer
                 </Button>
@@ -278,6 +278,13 @@ const MovieDetails = () => {
           </Box>
         </Box>
       </Box>
+
+      <TrailerDialog
+        open={trailerOpen}
+        onClose={() => setTrailerOpen(false)}
+        trailer={trailer}
+        movieTitle={movie.title}
+      />
 
       <Divider sx={{ my: 4 }} />
 
