@@ -2,7 +2,9 @@
 
 A responsive React web app to search for movies, view their details and discover trending films, using real-time data from [The Movie Database (TMDb) API](https://developer.themoviedb.org/docs).
 
-**🔗 Live demo:** _added after deployment_
+**🔗 Live demo:** [movie-explorer-wheat-mu.vercel.app](https://movie-explorer-wheat-mu.vercel.app)
+
+> Sign in with any username (3+ characters) and password (6+ characters).
 
 ![Home page with the featured movie banner](docs/screenshots/home.jpg)
 
