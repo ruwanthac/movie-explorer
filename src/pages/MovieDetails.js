@@ -16,6 +16,7 @@ import FavoriteButton from '../components/FavoriteButton';
 import TrailerDialog from '../components/TrailerDialog';
 import MovieDetailsSkeleton from '../components/MovieDetailsSkeleton';
 import { useMovies } from '../context/MovieContext';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import { getImageUrl } from '../api/tmdb';
 import { BACKDROP_SIZE } from '../utils/constants';
 import {
@@ -57,6 +58,11 @@ const MovieDetails = () => {
   const validId = isValidId(id);
   const hasData = Boolean(movie);
 
+  const notFound = !validId || entry?.notFound;
+  useDocumentTitle(
+    notFound ? 'Movie not found' : movie ? `${movie.title} (${getReleaseYear(movie.release_date)})` : null
+  );
+
   // Load the movie unless it is already cached from an earlier visit
   useEffect(() => {
     if (!validId || hasData) return undefined;
@@ -77,7 +83,7 @@ const MovieDetails = () => {
     </Button>
   );
 
-  if (!validId || entry?.notFound) {
+  if (notFound) {
     return <NotFoundMessage />;
   }
 

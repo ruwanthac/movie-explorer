@@ -14,6 +14,7 @@ import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import MovieGrid from '../components/MovieGrid';
 import { useMovies } from '../context/MovieContext';
 import { useNotification } from '../context/NotificationContext';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const EmptyFavorites = () => (
   <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
@@ -35,6 +36,7 @@ const Favorites = () => {
   const { favorites, clearFavorites } = useMovies();
   const { notify } = useNotification();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  useDocumentTitle('My favorites');
 
   const handleClearAll = () => {
     clearFavorites();

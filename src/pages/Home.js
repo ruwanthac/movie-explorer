@@ -15,6 +15,7 @@ import PaginationModeToggle from '../components/PaginationModeToggle';
 import FilterPanel from '../components/FilterPanel';
 import SearchBar from '../components/SearchBar';
 import useDebounce from '../hooks/useDebounce';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import usePaginationMode from '../hooks/usePaginationMode';
 import { countActiveFilters, EMPTY_FILTERS, useMovies } from '../context/MovieContext';
 
@@ -68,6 +69,7 @@ const Home = () => {
   const debouncedQuery = useDebounce(input.trim(), SEARCH_DELAY_MS);
 
   const [paginationMode, setPaginationMode] = usePaginationMode();
+  useDocumentTitle(search.query ? `Search: ${search.query}` : null);
 
   // The in-flight search / filter requests, so they can be cancelled when a newer one starts
   const searchControllerRef = useRef(null);
