@@ -13,8 +13,8 @@ const tmdb = axios.create({
 });
 
 // Trending movies for the week (paginated)
-export const getTrendingMovies = async (page = 1) => {
-  const { data } = await tmdb.get('/trending/movie/week', { params: { page } });
+export const getTrendingMovies = async (page = 1, signal) => {
+  const { data } = await tmdb.get('/trending/movie/week', { params: { page }, signal });
   return data;
 };
 
